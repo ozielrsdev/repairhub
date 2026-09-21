@@ -1,75 +1,31 @@
-# React + TypeScript + Vite
+# TechControl
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema para ajudar pequenos comércios a organizar serviços de manutenção de computadores e outros equipamentos.
 
-Currently, two official plugins are available:
+## Problema
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Pequenos comércios que dependem de computadores para trabalhar precisam realizar serviços de manutenção com frequência, como formatação, limpeza e troca de componentes. Muitas vezes, essas informações ficam espalhadas em conversas de WhatsApp, anotações ou planilhas, dificultando o acompanhamento dos equipamentos e dos serviços realizados. O projeto busca organizar essas informações em um único lugar, facilitando o controle dos clientes, equipamentos e serviços. Assim, o responsável pelo comércio consegue saber com mais facilidade o que foi feito, o que está pendente e quais equipamentos já passaram por manutenção.
 
-## React Compiler
+## Objetivo
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Criar uma ferramenta simples para organizar clientes, equipamentos e serviços de manutenção em um único lugar.
 
-## Expanding the ESLint configuration
+## Funcionalidades
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+A primeira versão do projeto terá:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* Cadastro de serviços de manutenção;
+* Cadastro do cliente e equipamento;
+* Descrição do problema;
+* Registro do serviço realizado;
+* Acompanhamento do status do serviço.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tecnologias
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* React
+* TypeScript
+* Vite
 
-```
+## Status
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Em desenvolvimento.
