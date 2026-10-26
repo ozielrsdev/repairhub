@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project context
 
-TechControl is a system to help small businesses organize computer and equipment maintenance services. It should support registering clients, equipment, and services performed, plus tracking the status of each service. The first version should be simple and functional, prioritizing service tracking above all else.
+RepairHub is a system to help small businesses organize computer and equipment maintenance services. It should support registering clients, equipment, and services performed, plus tracking the status of each service. The first version should be simple and functional, prioritizing service tracking above all else.
 
 The project has an initial service-tracking feature in place (no separate client/equipment registration yet — those are plain string fields on a service).
 

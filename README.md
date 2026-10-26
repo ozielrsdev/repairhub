@@ -1,4 +1,4 @@
-# TechControl
+# RepairHub
 
 Sistema para ajudar pequenos comércios a organizar serviços de manutenção de computadores e outros equipamentos.
 

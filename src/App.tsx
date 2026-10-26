@@ -21,7 +21,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>TechControl</h1>
+        <h1>RepairHub</h1>
         <p>Controle de serviços de manutenção</p>
       </header>
 
