@@ -64,6 +64,7 @@ npm run lint       # confere o padrão do código (ESLint)
 |   |-- components/
 |   |   |-- ServiceForm.tsx    <- formulário de cadastro
 |   |   |-- ui/                <- componentes do shadcn (gerados pelo CLI, evite editar)
+|   |   |-- Footer.tsx         <- rodapé: autoria, direitos e links do LinkedIn e GitHub
 |   |   |-- ServiceBadges.tsx  <- selos de status e de urgência (com ícone)
 |   |   |-- ServiceBoard.tsx   <- quadro Kanban: colunas por status e arrastar/soltar
 |   |   `-- ServiceCard.tsx    <- card de um serviço: resumo, detalhes, status e erros

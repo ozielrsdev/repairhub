@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ServiceForm from './components/ServiceForm'
+import Footer from './components/Footer'
 import ServiceBoard from './components/ServiceBoard'
 import {
   changeStatus,
@@ -63,7 +64,7 @@ function App() {
         <p className="mt-1 text-muted-foreground">Controle de serviços de manutenção</p>
       </header>
 
-      <main className="flex flex-col gap-10">
+      <main className="flex flex-1 flex-col gap-10">
         <ServiceForm onAddService={handleAddService} />
 
         <section className="grid gap-4">
@@ -77,6 +78,8 @@ function App() {
           />
         </section>
       </main>
+
+      <Footer />
     </div>
   )
 }
