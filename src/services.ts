@@ -2,11 +2,13 @@ import { z } from 'zod'
 import { SERVICE_STATUSES } from './types'
 import type { Service, ServiceStatus } from './types'
 
-// O serviço realizado não é obrigatório no cadastro: ele só é exigido ao concluir.
+// O diagnóstico e o serviço realizado não são obrigatórios no cadastro: o diagnóstico é
+// exigido ao ir para Em manutenção, e o serviço realizado, ao concluir.
 const newServiceSchema = z.object({
   client: z.string().trim().min(1, { message: 'Cliente é obrigatório' }),
   equipment: z.string().trim().min(1, { message: 'Equipamento é obrigatório' }),
   problem: z.string().trim().min(1, { message: 'Descrição do problema é obrigatória' }),
+  diagnosis: z.string().trim().default(''),
   serviceDone: z.string().trim().default(''),
 })
 
@@ -37,6 +39,10 @@ export function changeStatus(service: Service, newStatus: ServiceStatus): Servic
     )
   }
 
+  if (newStatus === 'Em manutenção' && !service.diagnosis.trim()) {
+    throw new Error('Preencha o diagnóstico antes de colocar o serviço Em manutenção')
+  }
+
   if (newStatus === 'Concluído' && !service.serviceDone.trim()) {
     throw new Error('Preencha o serviço realizado antes de marcar como Concluído')
   }
@@ -60,4 +66,16 @@ export function updateServiceDone(service: Service, serviceDone: string): Servic
   }
 
   return updated
+}
+
+// O diagnóstico pode ser registrado em qualquer status e não muda o status. Só não pode
+// ser apagado depois que o serviço entrou em manutenção, senão a regra seria contornada.
+export function updateDiagnosis(service: Service, diagnosis: string): Service {
+  const text = diagnosis.trim()
+
+  if ((service.status === 'Em manutenção' || service.status === 'Concluído') && !text) {
+    throw new Error('Serviço Em manutenção ou Concluído precisa ter o diagnóstico preenchido')
+  }
+
+  return { ...service, diagnosis: text }
 }

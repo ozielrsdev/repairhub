@@ -11,7 +11,7 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 - Cadastro de serviço com cliente, equipamento e descrição do problema (os três obrigatórios).
 - Todo serviço novo começa em **Recebido**.
 - Acompanhamento do status: **Recebido → Em análise → Em manutenção → Concluído**.
-- Registro do serviço realizado direto no card, a qualquer momento.
+- Registro do diagnóstico e do serviço realizado direto no card, a qualquer momento.
 - Mensagens de erro na tela quando uma regra é quebrada.
 
 > Os dados ficam só na memória do navegador: somem ao recarregar a página. Salvar de
@@ -23,6 +23,8 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 |---|---|
 | Cliente, equipamento e descrição do problema são obrigatórios no cadastro | cadastrar sem equipamento → erro "Equipamento é obrigatório" |
 | O status anda um passo por vez, pra frente ou pra trás | Recebido → Em análise funciona; Recebido → Concluído dá erro |
+| Só vai para Em manutenção com o diagnóstico preenchido | Em análise → Em manutenção com o diagnóstico vazio dá erro |
+| Serviço Em manutenção ou Concluído não pode ficar sem diagnóstico | apagar o diagnóstico de um serviço Em manutenção dá erro |
 | Só conclui com o serviço realizado preenchido | Em manutenção → Concluído com o campo vazio dá erro |
 | Salvar o serviço realizado de um serviço Em manutenção já o conclui | o botão vira "Salvar e concluir" |
 | Serviço concluído não pode ficar sem serviço realizado | apagar o texto de um serviço Concluído dá erro |

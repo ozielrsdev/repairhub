@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ServiceForm from './components/ServiceForm'
 import ServiceList from './components/ServiceList'
-import { changeStatus, createService, updateServiceDone } from './services'
+import { changeStatus, createService, updateDiagnosis, updateServiceDone } from './services'
 import type { NewServiceInput } from './services'
 import type { Service, ServiceStatus } from './types'
 import './App.css'
@@ -39,6 +39,10 @@ function App() {
     return updateService(id, (service) => changeStatus(service, status))
   }
 
+  function handleDiagnosisChange(id: string, diagnosis: string): string | null {
+    return updateService(id, (service) => updateDiagnosis(service, diagnosis))
+  }
+
   function handleServiceDoneChange(id: string, serviceDone: string): string | null {
     return updateService(id, (service) => updateServiceDone(service, serviceDone))
   }
@@ -58,6 +62,7 @@ function App() {
           <ServiceList
             services={services}
             onStatusChange={handleStatusChange}
+            onDiagnosisChange={handleDiagnosisChange}
             onServiceDoneChange={handleServiceDoneChange}
           />
         </section>

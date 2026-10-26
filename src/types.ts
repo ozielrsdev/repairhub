@@ -5,6 +5,7 @@ export interface Service {
   client: string
   equipment: string
   problem: string
+  diagnosis: string
   serviceDone: string
   status: ServiceStatus
 }

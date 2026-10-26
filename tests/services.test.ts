@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { changeStatus, createService, updateServiceDone } from '../src/services'
+import { changeStatus, createService, updateDiagnosis, updateServiceDone } from '../src/services'
 import type { Service } from '../src/types'
 
 const novoServico = {
@@ -118,5 +118,64 @@ describe('salvar o serviço realizado conclui quando está Em manutenção', () 
   test('Em manutenção + texto vazio → continua Em manutenção', () => {
     const servico = updateServiceDone(servicoEm('Em manutenção'), '  ')
     expect(servico.status).toBe('Em manutenção')
+  })
+})
+
+function servicoComDiagnostico(status: Service['status'], diagnosis: string): Service {
+  return { ...servicoEm(status), diagnosis }
+}
+
+describe('d) diagnóstico antes de Em manutenção', () => {
+  test('dá erro ao ir para Em manutenção sem diagnóstico', () => {
+    expect(() => changeStatus(servicoComDiagnostico('Em análise', ''), 'Em manutenção')).toThrow(
+      'Preencha o diagnóstico antes de colocar o serviço Em manutenção',
+    )
+  })
+
+  test('diagnóstico só com espaços conta como vazio', () => {
+    expect(() => changeStatus(servicoComDiagnostico('Em análise', '   '), 'Em manutenção')).toThrow(
+      'Preencha o diagnóstico',
+    )
+  })
+
+  test('com diagnóstico, avança para Em manutenção', () => {
+    const servico = servicoComDiagnostico('Em análise', 'Fonte queimada, precisa trocar')
+    expect(changeStatus(servico, 'Em manutenção').status).toBe('Em manutenção')
+  })
+})
+
+describe('registrar o diagnóstico', () => {
+  test('cadastra sem diagnóstico: ele só é exigido ao ir para Em manutenção', () => {
+    expect(createService(novoServico).diagnosis).toBe('')
+  })
+
+  test('registra o diagnóstico sem mudar o status', () => {
+    const servico = updateDiagnosis(servicoEm('Em análise'), '  HD com setores defeituosos  ')
+    expect(servico.diagnosis).toBe('HD com setores defeituosos')
+    expect(servico.status).toBe('Em análise')
+  })
+
+  test('dá erro ao apagar o diagnóstico de um serviço Em manutenção', () => {
+    const servico = servicoComDiagnostico('Em manutenção', 'Fonte queimada')
+    expect(() => updateDiagnosis(servico, '  ')).toThrow(
+      'Serviço Em manutenção ou Concluído precisa ter o diagnóstico preenchido',
+    )
+  })
+
+  test('dá erro ao apagar o diagnóstico de um serviço Concluído', () => {
+    const servico = { ...servicoComDiagnostico('Concluído', 'Fonte queimada'), serviceDone: 'Troca da fonte' }
+    expect(() => updateDiagnosis(servico, '')).toThrow('precisa ter o diagnóstico preenchido')
+  })
+
+  test('fluxo completo: cadastrar → Em análise → diagnóstico → Em manutenção → serviço realizado → Concluído', () => {
+    let servico = createService(novoServico)
+    servico = changeStatus(servico, 'Em análise')
+    servico = updateDiagnosis(servico, 'Memória RAM insuficiente')
+    servico = changeStatus(servico, 'Em manutenção')
+    servico = updateServiceDone(servico, 'Instalação de mais 8 GB de RAM')
+
+    expect(servico.status).toBe('Concluído')
+    expect(servico.diagnosis).toBe('Memória RAM insuficiente')
+    expect(servico.serviceDone).toBe('Instalação de mais 8 GB de RAM')
   })
 })

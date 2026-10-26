@@ -5,17 +5,37 @@ import type { Service, ServiceStatus } from '../types'
 interface ServiceListProps {
   services: Service[]
   onStatusChange: (id: string, status: ServiceStatus) => string | null
+  onDiagnosisChange: (id: string, diagnosis: string) => string | null
   onServiceDoneChange: (id: string, serviceDone: string) => string | null
 }
 
-function ServiceList({ services, onStatusChange, onServiceDoneChange }: ServiceListProps) {
+function ServiceList({
+  services,
+  onStatusChange,
+  onDiagnosisChange,
+  onServiceDoneChange,
+}: ServiceListProps) {
   const [errors, setErrors] = useState<Record<string, string | null>>({})
   // Texto que o técnico está digitando e ainda não salvou, por serviço.
   const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const [diagnosisDrafts, setDiagnosisDrafts] = useState<Record<string, string>>({})
 
   function handleStatusChange(id: string, status: ServiceStatus) {
     const result = onStatusChange(id, status)
     setErrors((current) => ({ ...current, [id]: result }))
+  }
+
+  function handleSaveDiagnosis(id: string, diagnosis: string) {
+    const result = onDiagnosisChange(id, diagnosis)
+    setErrors((current) => ({ ...current, [id]: result }))
+
+    if (!result) {
+      setDiagnosisDrafts((current) => {
+        const next = { ...current }
+        delete next[id]
+        return next
+      })
+    }
   }
 
   function handleSaveServiceDone(id: string, serviceDone: string) {
@@ -39,6 +59,7 @@ function ServiceList({ services, onStatusChange, onServiceDoneChange }: ServiceL
     <ul className="service-list">
       {services.map((service) => {
         const draft = drafts[service.id] ?? service.serviceDone
+        const diagnosisDraft = diagnosisDrafts[service.id] ?? service.diagnosis
 
         return (
           <li key={service.id} className="service-card">
@@ -57,6 +78,28 @@ function ServiceList({ services, onStatusChange, onServiceDoneChange }: ServiceL
                 <strong>Problema:</strong> {service.problem}
               </p>
             )}
+
+            <label className="service-done-edit">
+              <strong>Diagnóstico</strong>
+              <textarea
+                value={diagnosisDraft}
+                onChange={(event) =>
+                  setDiagnosisDrafts((current) => ({
+                    ...current,
+                    [service.id]: event.target.value,
+                  }))
+                }
+                placeholder="Ex: Fonte queimada, precisa trocar"
+              />
+            </label>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={diagnosisDraft === service.diagnosis}
+              onClick={() => handleSaveDiagnosis(service.id, diagnosisDraft)}
+            >
+              Salvar diagnóstico
+            </button>
 
             <label className="service-done-edit">
               <strong>Serviço realizado</strong>
