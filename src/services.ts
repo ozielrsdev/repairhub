@@ -1,6 +1,8 @@
 import { z } from 'zod'
-import { SERVICE_STATUSES } from './types'
-import type { Service, ServiceStatus } from './types'
+import { SERVICE_STATUSES, URGENCY_LEVELS } from './types'
+import type { Service, ServiceStatus, Urgency } from './types'
+
+const URGENCY_ERROR = 'Escolha a urgência: Baixa, Média, Alta ou Crítica'
 
 // O diagnóstico e o serviço realizado não são obrigatórios no cadastro: o diagnóstico é
 // exigido ao ir para Em manutenção, e o serviço realizado, ao concluir.
@@ -10,6 +12,7 @@ const newServiceSchema = z.object({
   problem: z.string().trim().min(1, { message: 'Descrição do problema é obrigatória' }),
   diagnosis: z.string().trim().default(''),
   serviceDone: z.string().trim().default(''),
+  urgency: z.enum(URGENCY_LEVELS, { message: URGENCY_ERROR }).default('Média'),
 })
 
 export type NewServiceInput = z.input<typeof newServiceSchema>
@@ -78,4 +81,39 @@ export function updateDiagnosis(service: Service, diagnosis: string): Service {
   }
 
   return { ...service, diagnosis: text }
+}
+
+// A urgência pode mudar em qualquer status (o diagnóstico pode mostrar que é mais grave do
+// que parecia) e não mexe no status.
+export function updateUrgency(service: Service, urgency: Urgency): Service {
+  if (!URGENCY_LEVELS.includes(urgency)) {
+    throw new Error(URGENCY_ERROR)
+  }
+
+  return { ...service, urgency }
+}
+
+// Mais urgentes primeiro. O sort é estável, então com a mesma urgência fica a ordem de
+// chegada da lista recebida.
+export function sortByUrgency(services: Service[]): Service[] {
+  return [...services].sort(
+    (a, b) => URGENCY_LEVELS.indexOf(b.urgency) - URGENCY_LEVELS.indexOf(a.urgency),
+  )
+}
+
+// Status para os quais o serviço pode ir agora, segundo as regras do changeStatus. A tela
+// usa pra destacar as colunas onde dá pra soltar o card.
+export function allowedStatuses(service: Service): ServiceStatus[] {
+  return SERVICE_STATUSES.filter((status) => {
+    if (status === service.status) {
+      return false
+    }
+
+    try {
+      changeStatus(service, status)
+      return true
+    } catch {
+      return false
+    }
+  })
 }

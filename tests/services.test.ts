@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { changeStatus, createService, updateDiagnosis, updateServiceDone } from '../src/services'
+import {
+  allowedStatuses,
+  changeStatus,
+  createService,
+  sortByUrgency,
+  updateDiagnosis,
+  updateServiceDone,
+  updateUrgency,
+} from '../src/services'
 import type { Service } from '../src/types'
 
 const novoServico = {
@@ -177,5 +185,93 @@ describe('registrar o diagnóstico', () => {
     expect(servico.status).toBe('Concluído')
     expect(servico.diagnosis).toBe('Memória RAM insuficiente')
     expect(servico.serviceDone).toBe('Instalação de mais 8 GB de RAM')
+  })
+})
+
+describe('para quais status o serviço pode ir (colunas do quadro)', () => {
+  test('Recebido só pode ir para Em análise', () => {
+    expect(allowedStatuses(servicoEm('Recebido'))).toEqual(['Em análise'])
+  })
+
+  test('Em análise sem diagnóstico só pode voltar para Recebido', () => {
+    expect(allowedStatuses(servicoComDiagnostico('Em análise', ''))).toEqual(['Recebido'])
+  })
+
+  test('Em análise com diagnóstico pode voltar ou ir para Em manutenção', () => {
+    expect(allowedStatuses(servicoComDiagnostico('Em análise', 'Fonte queimada'))).toEqual([
+      'Recebido',
+      'Em manutenção',
+    ])
+  })
+
+  test('Em manutenção sem serviço realizado só pode voltar para Em análise', () => {
+    expect(allowedStatuses(servicoComDiagnostico('Em manutenção', 'Fonte queimada'))).toEqual([
+      'Em análise',
+    ])
+  })
+
+  test('Concluído só pode voltar para Em manutenção', () => {
+    const servico = { ...servicoComDiagnostico('Concluído', 'Fonte queimada'), serviceDone: 'Troca da fonte' }
+    expect(allowedStatuses(servico)).toEqual(['Em manutenção'])
+  })
+})
+
+describe('nível de urgência', () => {
+  test('cadastra com a urgência escolhida', () => {
+    expect(createService({ ...novoServico, urgency: 'Crítica' }).urgency).toBe('Crítica')
+  })
+
+  test('sem urgência escolhida, cadastra como Média', () => {
+    expect(createService(novoServico).urgency).toBe('Média')
+  })
+
+  test('dá erro com urgência que não existe', () => {
+    expect(() =>
+      createService({ ...novoServico, urgency: 'Altíssima' as Service['urgency'] }),
+    ).toThrow('Escolha a urgência: Baixa, Média, Alta ou Crítica')
+  })
+
+  test('muda a urgência depois do cadastro sem mudar o status', () => {
+    const servico = updateUrgency(servicoEm('Em manutenção'), 'Alta')
+    expect(servico.urgency).toBe('Alta')
+    expect(servico.status).toBe('Em manutenção')
+  })
+
+  test('muda a urgência mesmo de um serviço Concluído', () => {
+    const concluido = { ...servicoComDiagnostico('Concluído', 'Fonte queimada'), serviceDone: 'Troca da fonte' }
+    expect(updateUrgency(concluido, 'Baixa').urgency).toBe('Baixa')
+  })
+
+  test('dá erro ao mudar para uma urgência que não existe', () => {
+    expect(() => updateUrgency(servicoEm('Recebido'), 'Urgentíssima' as Service['urgency'])).toThrow(
+      'Escolha a urgência: Baixa, Média, Alta ou Crítica',
+    )
+  })
+
+  test('ordena do mais urgente para o menos urgente', () => {
+    const servicos = (['Baixa', 'Crítica', 'Média', 'Alta'] as const).map((urgency) =>
+      createService({ ...novoServico, client: urgency, urgency }),
+    )
+    expect(sortByUrgency(servicos).map((s) => s.urgency)).toEqual(['Crítica', 'Alta', 'Média', 'Baixa'])
+  })
+
+  test('com a mesma urgência, quem chegou primeiro fica em cima', () => {
+    const primeiro = createService({ ...novoServico, client: 'Primeiro', urgency: 'Alta' })
+    const segundo = createService({ ...novoServico, client: 'Segundo', urgency: 'Alta' })
+    const baixa = createService({ ...novoServico, client: 'Baixa', urgency: 'Baixa' })
+    expect(sortByUrgency([baixa, primeiro, segundo]).map((s) => s.client)).toEqual([
+      'Primeiro',
+      'Segundo',
+      'Baixa',
+    ])
+  })
+
+  test('não altera a lista original', () => {
+    const servicos = [
+      createService({ ...novoServico, client: 'A', urgency: 'Baixa' }),
+      createService({ ...novoServico, client: 'B', urgency: 'Crítica' }),
+    ]
+    sortByUrgency(servicos)
+    expect(servicos.map((s) => s.client)).toEqual(['A', 'B'])
   })
 })
