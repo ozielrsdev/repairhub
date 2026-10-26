@@ -1,39 +1,42 @@
-# CLAUDE.md
+# RepairHub
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Sistema para pequenos comércios organizarem os serviços de manutenção dos seus computadores
+e equipamentos: quem trouxe, o que deu problema, o que foi feito e em que pé está.
+É pro responsável pelo comércio e pro técnico que faz a manutenção.
 
-## Project context
+## Stack
 
-RepairHub is a system to help small businesses organize computer and equipment maintenance services. It should support registering clients, equipment, and services performed, plus tracking the status of each service. The first version should be simple and functional, prioritizing service tracking above all else.
+- React 19 + TypeScript, Vite. Validação com Zod. Testes com Vitest.
+- Regras de negócio em `src/services.ts`, sem nada de tela. Componentes em `src/components/`.
+- Os dados ficam em memória (`useState` no `App.tsx`): ainda não há persistência.
 
-The project has an initial service-tracking feature in place (no separate client/equipment registration yet — those are plain string fields on a service).
+## Comandos
 
-## Domain model (current)
+- `npm install` — instala as dependências
+- `npm run dev` — abre o sistema em http://localhost:5173
+- `npm test` — roda os testes
+- `npm run build` — confere os tipos e gera a versão final
+- `npm run lint` — confere o padrão do código
 
-- `src/types.ts` defines the `Service` entity (`id`, `client`, `equipment`, `problem`, `serviceDone`, `status`) and `ServiceStatus`, a union of 4 states: `Recebido`, `Em análise`, `Em manutenção`, `Concluído`.
-- `src/App.tsx` holds the list of services in local component state (`useState`) — no persistence layer yet, everything resets on reload.
-- `src/components/ServiceForm.tsx` — form to register a new service (client, equipment, problem, service performed, status).
-- `src/components/ServiceList.tsx` — renders registered services as cards, each with a status badge and a select to update its status.
+## Regras
 
-## Commands
+- Os testes em `tests/` são a especificação. **Nunca edite um teste pra fazê-lo passar** —
+  corrija o código. Acrescentar teste novo pode.
+- Antes de dizer que terminou, rode `npm test`, `npm run build` e `npm run lint` e mostre
+  o resultado real.
+- Antes de dizer que terminou, teste o fluxo completo do usuário, não só cada regra
+  sozinha: cadastrar → avançar o status → registrar o serviço realizado → concluir. Se
+  mudar uma regra, confira se a tela ainda deixa fazer esse caminho inteiro.
+- Não instale nenhuma dependência sem me perguntar antes.
+- Toda regra de negócio nova vai em `src/services.ts`, com teste escrito antes do código
+  (skill `tdd`). Mensagens de erro em português, voltadas pra quem usa o sistema.
 
-```bash
-npm run dev      # start the local dev server (Vite)
-npm run build    # type-check (tsc -b) then production build
-npm run lint     # run ESLint over the project
-npm run preview  # preview the production build locally
-```
+## Como eu quero trabalhar com você
 
-There is no test runner configured yet.
+- Antes de criar ou mudar arquivos, me mostre o plano e espere eu confirmar.
+- Se um pedido meu entrar em conflito com uma regra que já existe, me avise e me dê as
+  opções antes de fazer.
 
-## Technical conventions
+## Onde este projeto está
 
-- TypeScript and functional React components only (no class components).
-- Component names use PascalCase.
-
-## Architecture notes
-
-- Vite is the build tool (`vite.config.ts`), using `@vitejs/plugin-react`.
-- TypeScript project is split via references in `tsconfig.json` into `tsconfig.app.json` (app source, `src/`) and `tsconfig.node.json` (Vite config tooling).
-- ESLint config (`eslint.config.js`) uses the flat config format with `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`.
-- App entry point is `src/main.tsx`, rendering `src/App.tsx`.
+- https://github.com/ozielrsdev/repairhub
