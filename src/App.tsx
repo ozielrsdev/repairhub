@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import ServiceForm from './components/ServiceForm'
-import ServiceList from './components/ServiceList'
-import { changeStatus, createService, updateDiagnosis, updateServiceDone } from './services'
+import ServiceBoard from './components/ServiceBoard'
+import {
+  changeStatus,
+  createService,
+  updateDiagnosis,
+  updateServiceDone,
+  updateUrgency,
+} from './services'
 import type { NewServiceInput } from './services'
-import type { Service, ServiceStatus } from './types'
-import './App.css'
+import type { Service, ServiceStatus, Urgency } from './types'
 
 // Os handlers devolvem a mensagem de erro da regra violada, ou null se deu certo.
 function App() {
@@ -47,23 +52,28 @@ function App() {
     return updateService(id, (service) => updateServiceDone(service, serviceDone))
   }
 
+  function handleUrgencyChange(id: string, urgency: Urgency): string | null {
+    return updateService(id, (service) => updateUrgency(service, urgency))
+  }
+
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>RepairHub</h1>
-        <p>Controle de serviços de manutenção</p>
+    <div className="mx-auto flex min-h-svh max-w-7xl flex-col gap-10 px-4 py-8 sm:px-6">
+      <header className="text-center">
+        <h1 className="text-4xl font-semibold tracking-tight">RepairHub</h1>
+        <p className="mt-1 text-muted-foreground">Controle de serviços de manutenção</p>
       </header>
 
-      <main className="app-main">
+      <main className="flex flex-col gap-10">
         <ServiceForm onAddService={handleAddService} />
 
-        <section className="service-section">
-          <h2>Serviços cadastrados</h2>
-          <ServiceList
+        <section className="grid gap-4">
+          <h2 className="text-xl font-semibold tracking-tight">Quadro de serviços</h2>
+          <ServiceBoard
             services={services}
             onStatusChange={handleStatusChange}
             onDiagnosisChange={handleDiagnosisChange}
             onServiceDoneChange={handleServiceDoneChange}
+            onUrgencyChange={handleUrgencyChange}
           />
         </section>
       </main>

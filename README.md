@@ -11,7 +11,14 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 - Cadastro de serviço com cliente, equipamento e descrição do problema (os três obrigatórios).
 - Todo serviço novo começa em **Recebido**.
 - Acompanhamento do status: **Recebido → Em análise → Em manutenção → Concluído**.
-- Registro do diagnóstico e do serviço realizado direto no card, a qualquer momento.
+- Quadro Kanban com uma coluna por status: o card muda de coluna sozinho quando o status
+  muda. No computador, o status muda arrastando o card (as colunas permitidas ficam
+  destacadas) ou pelo seletor em **Ver detalhes**, pra quem usa teclado. Em tela de toque
+  (celular e tablet), onde não dá pra arrastar, o seletor de status fica no próprio card.
+- Nível de urgência (Baixa, Média, Alta, Crítica) com ícone no card; os mais urgentes
+  ficam no topo de cada coluna.
+- Card resumido (cliente, urgência, equipamento e problema); em **Ver detalhes** dá pra
+  registrar o diagnóstico e o serviço realizado e trocar a urgência, a qualquer momento.
 - Mensagens de erro na tela quando uma regra é quebrada.
 
 > Os dados ficam só na memória do navegador: somem ao recarregar a página. Salvar de
@@ -28,6 +35,9 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 | Só conclui com o serviço realizado preenchido | Em manutenção → Concluído com o campo vazio dá erro |
 | Salvar o serviço realizado de um serviço Em manutenção já o conclui | o botão vira "Salvar e concluir" |
 | Serviço concluído não pode ficar sem serviço realizado | apagar o texto de um serviço Concluído dá erro |
+| Urgência é Baixa, Média, Alta ou Crítica; sem escolher, fica Média | urgência "Altíssima" dá erro |
+| A urgência pode mudar em qualquer status, sem mexer no status | mudar de Baixa para Alta num serviço Concluído funciona |
+| Em cada coluna, os mais urgentes ficam em cima; empate, quem chegou primeiro | Crítica, depois Alta, Média e Baixa |
 
 Todas as regras estão em `src/services.ts` e têm teste em `tests/services.test.ts`.
 
@@ -53,8 +63,11 @@ npm run lint       # confere o padrão do código (ESLint)
 |   |-- App.tsx                <- guarda a lista de serviços e liga a tela às regras
 |   |-- components/
 |   |   |-- ServiceForm.tsx    <- formulário de cadastro
-|   |   `-- ServiceList.tsx    <- cards dos serviços: status, serviço realizado e erros
-|   |-- App.css, index.css     <- estilos (cores do tema claro e escuro em index.css)
+|   |   |-- ui/                <- componentes do shadcn (gerados pelo CLI, evite editar)
+|   |   |-- ServiceBadges.tsx  <- selos de status e de urgência (com ícone)
+|   |   |-- ServiceBoard.tsx   <- quadro Kanban: colunas por status e arrastar/soltar
+|   |   `-- ServiceCard.tsx    <- card de um serviço: resumo, detalhes, status e erros
+|   |-- index.css              <- tema do shadcn (cores claro/escuro) e Tailwind
 |   `-- main.tsx               <- ponto de entrada do React
 |-- tests/
 |   `-- services.test.ts       <- testes das regras de negócio
@@ -68,6 +81,7 @@ npm run lint       # confere o padrão do código (ESLint)
 - React 19 + TypeScript
 - Vite (servidor de desenvolvimento e build)
 - Zod (validação do cadastro)
+- Tailwind CSS 4 + shadcn/ui (componentes em `src/components/ui/`, ícones lucide-react)
 - Vitest (testes)
 - ESLint (padrão de código)
 

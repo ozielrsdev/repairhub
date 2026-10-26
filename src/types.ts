@@ -1,5 +1,7 @@
 export type ServiceStatus = 'Recebido' | 'Em análise' | 'Em manutenção' | 'Concluído'
 
+export type Urgency = 'Baixa' | 'Média' | 'Alta' | 'Crítica'
+
 export interface Service {
   id: string
   client: string
@@ -7,6 +9,7 @@ export interface Service {
   problem: string
   diagnosis: string
   serviceDone: string
+  urgency: Urgency
   status: ServiceStatus
 }
 
@@ -17,9 +20,5 @@ export const SERVICE_STATUSES: ServiceStatus[] = [
   'Concluído',
 ]
 
-export const STATUS_SLUGS: Record<ServiceStatus, string> = {
-  Recebido: 'recebido',
-  'Em análise': 'em-analise',
-  'Em manutenção': 'em-manutencao',
-  Concluído: 'concluido',
-}
+// Do menos para o mais urgente.
+export const URGENCY_LEVELS: Urgency[] = ['Baixa', 'Média', 'Alta', 'Crítica']
