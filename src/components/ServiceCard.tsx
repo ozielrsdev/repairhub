@@ -28,9 +28,39 @@ interface ServiceCardProps {
   onDragEnd: () => void
 }
 
+function StatusSelect({
+  status,
+  onChange,
+  id,
+  className,
+}: {
+  status: ServiceStatus
+  onChange: (status: ServiceStatus) => void
+  id?: string
+  className?: string
+}) {
+  return (
+    <Select value={status} onValueChange={(value) => onChange(value as ServiceStatus)}>
+      <SelectTrigger id={id} size="sm" aria-label="Status" className={className}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {SERVICE_STATUSES.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
+
 // Resumido, o card mostra só cliente, urgência, equipamento e problema; os detalhes abrem o
 // diagnóstico, o serviço realizado e a troca de urgência. Com os detalhes abertos o card não
 // arrasta, pra não atrapalhar a seleção de texto nas caixas.
+//
+// O seletor de status fica no card resumido só em tela de toque, onde não dá pra arrastar.
+// Com mouse, o status muda arrastando, e o seletor fica nos detalhes pra quem usa teclado.
 function ServiceCard({
   service,
   error,
@@ -57,6 +87,7 @@ function ServiceCard({
   const diagnosisId = `diagnosis-${service.id}`
   const serviceDoneId = `service-done-${service.id}`
   const urgencyId = `urgency-${service.id}`
+  const statusId = `status-${service.id}`
 
   return (
     <li
@@ -147,25 +178,25 @@ function ServiceCard({
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="grid gap-2 pointer-coarse:hidden">
+                <Label htmlFor={statusId}>Status</Label>
+                <StatusSelect
+                  id={statusId}
+                  status={service.status}
+                  onChange={onStatusChange}
+                  className="w-full"
+                />
+              </div>
             </div>
           )}
 
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <Select
-              value={service.status}
-              onValueChange={(value) => onStatusChange(value as ServiceStatus)}
-            >
-              <SelectTrigger size="sm" aria-label="Status" className="min-w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SERVICE_STATUSES.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <StatusSelect
+              status={service.status}
+              onChange={onStatusChange}
+              className="hidden min-w-36 pointer-coarse:flex"
+            />
 
             <Button
               variant="ghost"

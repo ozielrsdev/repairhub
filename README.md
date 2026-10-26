@@ -12,9 +12,9 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 - Todo serviço novo começa em **Recebido**.
 - Acompanhamento do status: **Recebido → Em análise → Em manutenção → Concluído**.
 - Quadro Kanban com uma coluna por status: o card muda de coluna sozinho quando o status
-  muda. Dá pra arrastar o card para outra coluna (no computador) ou trocar o status pelo
-  seletor do card (funciona também no celular). Durante o arraste, as colunas permitidas
-  ficam destacadas.
+  muda. No computador, o status muda arrastando o card (as colunas permitidas ficam
+  destacadas) ou pelo seletor em **Ver detalhes**, pra quem usa teclado. Em tela de toque
+  (celular e tablet), onde não dá pra arrastar, o seletor de status fica no próprio card.
 - Nível de urgência (Baixa, Média, Alta, Crítica) com ícone no card; os mais urgentes
   ficam no topo de cada coluna.
 - Card resumido (cliente, urgência, equipamento e problema); em **Ver detalhes** dá pra
