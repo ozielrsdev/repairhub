@@ -1,21 +1,46 @@
 import { useState } from 'react'
 import ServiceForm from './components/ServiceForm'
 import ServiceList from './components/ServiceList'
+import { changeStatus, createService, updateServiceDone } from './services'
+import type { NewServiceInput } from './services'
 import type { Service, ServiceStatus } from './types'
 import './App.css'
 
+// Os handlers devolvem a mensagem de erro da regra violada, ou null se deu certo.
 function App() {
   const [services, setServices] = useState<Service[]>([])
 
-  function handleAddService(newService: Omit<Service, 'id'>) {
-    const service: Service = { ...newService, id: crypto.randomUUID() }
-    setServices((current) => [...current, service])
+  function handleAddService(input: NewServiceInput): string | null {
+    try {
+      const service = createService(input)
+      setServices((current) => [...current, service])
+      return null
+    } catch (error) {
+      return (error as Error).message
+    }
   }
 
-  function handleStatusChange(id: string, status: ServiceStatus) {
-    setServices((current) =>
-      current.map((service) => (service.id === id ? { ...service, status } : service)),
-    )
+  function updateService(id: string, update: (service: Service) => Service): string | null {
+    const service = services.find((item) => item.id === id)
+    if (!service) {
+      return 'Serviço não encontrado'
+    }
+
+    try {
+      const updated = update(service)
+      setServices((current) => current.map((item) => (item.id === id ? updated : item)))
+      return null
+    } catch (error) {
+      return (error as Error).message
+    }
+  }
+
+  function handleStatusChange(id: string, status: ServiceStatus): string | null {
+    return updateService(id, (service) => changeStatus(service, status))
+  }
+
+  function handleServiceDoneChange(id: string, serviceDone: string): string | null {
+    return updateService(id, (service) => updateServiceDone(service, serviceDone))
   }
 
   return (
@@ -30,7 +55,11 @@ function App() {
 
         <section className="service-section">
           <h2>Serviços cadastrados</h2>
-          <ServiceList services={services} onStatusChange={handleStatusChange} />
+          <ServiceList
+            services={services}
+            onStatusChange={handleStatusChange}
+            onServiceDoneChange={handleServiceDoneChange}
+          />
         </section>
       </main>
     </div>

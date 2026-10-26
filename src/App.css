@@ -148,3 +148,51 @@
   background: var(--bg);
   color: var(--text-h);
 }
+
+.service-done-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.service-done-edit textarea {
+  font: inherit;
+  font-size: 15px;
+  padding: 6px 8px;
+  min-height: 50px;
+  resize: vertical;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.secondary-button {
+  margin-top: 8px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-bg);
+  cursor: pointer;
+}
+
+.secondary-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.form-error {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--error);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--error);
+  background: var(--error-bg);
+}
