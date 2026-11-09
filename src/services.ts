@@ -24,7 +24,7 @@ export function createService(input: NewServiceInput): Service {
     throw new Error(result.error.issues[0].message)
   }
 
-  return { id: crypto.randomUUID(), ...result.data, status: 'Recebido' }
+  return { id: crypto.randomUUID(), ...result.data, budget: null, status: 'Recebido' }
 }
 
 // O status anda um passo por vez na ordem de SERVICE_STATUSES, pra frente ou pra trás.
@@ -44,6 +44,10 @@ export function changeStatus(service: Service, newStatus: ServiceStatus): Servic
 
   if (newStatus === 'Em manutenção' && !service.diagnosis.trim()) {
     throw new Error('Preencha o diagnóstico antes de colocar o serviço Em manutenção')
+  }
+
+  if (newStatus === 'Em manutenção' && service.budget === null) {
+    throw new Error('Registre o orçamento antes de colocar o serviço Em manutenção')
   }
 
   if (newStatus === 'Concluído' && !service.serviceDone.trim()) {
@@ -93,6 +97,16 @@ export function updateUrgency(service: Service, urgency: Urgency): Service {
   return { ...service, urgency }
 }
 
+// O orçamento pode ser registrado ou trocado em qualquer status, mas sempre com valor
+// maior que zero.
+export function updateBudget(service: Service, budget: number): Service {
+  if (!(budget > 0)) {
+    throw new Error('O orçamento precisa ser maior que zero')
+  }
+
+  return { ...service, budget }
+}
+
 // Mais urgentes primeiro. O sort é estável, então com a mesma urgência fica a ordem de
 // chegada da lista recebida.
 export function sortByUrgency(services: Service[]): Service[] {
@@ -116,4 +130,18 @@ export function allowedStatuses(service: Service): ServiceStatus[] {
       return false
     }
   })
+}
+
+// Quantos serviços há em cada status, com zero nos status vazios.
+export function countByStatus(services: Service[]): Record<ServiceStatus, number> {
+  const counts = Object.fromEntries(SERVICE_STATUSES.map((status) => [status, 0])) as Record<
+    ServiceStatus,
+    number
+  >
+
+  for (const service of services) {
+    counts[service.status] += 1
+  }
+
+  return counts
 }

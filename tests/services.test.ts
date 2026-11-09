@@ -2,8 +2,10 @@ import { describe, expect, test } from 'vitest'
 import {
   allowedStatuses,
   changeStatus,
+  countByStatus,
   createService,
   sortByUrgency,
+  updateBudget,
   updateDiagnosis,
   updateServiceDone,
   updateUrgency,
@@ -28,7 +30,13 @@ describe('a) cadastro', () => {
     expect(servico.client).toBe('Padaria Pão Quente')
     expect(servico.equipment).toBe('Computador do caixa')
     expect(servico.status).toBe('Recebido')
-    expect(servico.id).toBeTruthy()
+  })
+
+  test('cada serviço cadastrado ganha um id diferente', () => {
+    const primeiro = createService(novoServico)
+    const segundo = createService(novoServico)
+
+    expect(primeiro.id).not.toBe(segundo.id)
   })
 
   test('dá erro quando falta o cliente', () => {
@@ -146,8 +154,8 @@ describe('d) diagnóstico antes de Em manutenção', () => {
     )
   })
 
-  test('com diagnóstico, avança para Em manutenção', () => {
-    const servico = servicoComDiagnostico('Em análise', 'Fonte queimada, precisa trocar')
+  test('com diagnóstico e orçamento, avança para Em manutenção', () => {
+    const servico = { ...servicoComDiagnostico('Em análise', 'Fonte queimada, precisa trocar'), budget: 150 }
     expect(changeStatus(servico, 'Em manutenção').status).toBe('Em manutenção')
   })
 })
@@ -175,10 +183,11 @@ describe('registrar o diagnóstico', () => {
     expect(() => updateDiagnosis(servico, '')).toThrow('precisa ter o diagnóstico preenchido')
   })
 
-  test('fluxo completo: cadastrar → Em análise → diagnóstico → Em manutenção → serviço realizado → Concluído', () => {
+  test('fluxo completo: cadastrar → Em análise → diagnóstico → orçamento → Em manutenção → serviço realizado → Concluído', () => {
     let servico = createService(novoServico)
     servico = changeStatus(servico, 'Em análise')
     servico = updateDiagnosis(servico, 'Memória RAM insuficiente')
+    servico = updateBudget(servico, 250)
     servico = changeStatus(servico, 'Em manutenção')
     servico = updateServiceDone(servico, 'Instalação de mais 8 GB de RAM')
 
@@ -197,8 +206,9 @@ describe('para quais status o serviço pode ir (colunas do quadro)', () => {
     expect(allowedStatuses(servicoComDiagnostico('Em análise', ''))).toEqual(['Recebido'])
   })
 
-  test('Em análise com diagnóstico pode voltar ou ir para Em manutenção', () => {
-    expect(allowedStatuses(servicoComDiagnostico('Em análise', 'Fonte queimada'))).toEqual([
+  test('Em análise com diagnóstico e orçamento pode voltar ou ir para Em manutenção', () => {
+    const servico = { ...servicoComDiagnostico('Em análise', 'Fonte queimada'), budget: 150 }
+    expect(allowedStatuses(servico)).toEqual([
       'Recebido',
       'Em manutenção',
     ])
@@ -211,7 +221,11 @@ describe('para quais status o serviço pode ir (colunas do quadro)', () => {
   })
 
   test('Concluído só pode voltar para Em manutenção', () => {
-    const servico = { ...servicoComDiagnostico('Concluído', 'Fonte queimada'), serviceDone: 'Troca da fonte' }
+    const servico = {
+      ...servicoComDiagnostico('Concluído', 'Fonte queimada'),
+      serviceDone: 'Troca da fonte',
+      budget: 150,
+    }
     expect(allowedStatuses(servico)).toEqual(['Em manutenção'])
   })
 })
@@ -273,5 +287,65 @@ describe('nível de urgência', () => {
     ]
     sortByUrgency(servicos)
     expect(servicos.map((s) => s.client)).toEqual(['A', 'B'])
+  })
+})
+
+// Cenário 1 (semana 8)
+// Cenário: orçamento zero ou negativo não substitui o orçamento já registrado
+//   Dado um serviço Em análise com orçamento de R$ 150
+//   Quando tento mudar o orçamento para R$ -50 ou para R$ 0
+//   Então aparece o erro "O orçamento precisa ser maior que zero"
+//   E o serviço continua com orçamento de R$ 150
+describe('orçamento', () => {
+  test('orçamento zero ou negativo não substitui o orçamento já registrado', () => {
+    // Dado
+    const servico = updateBudget(servicoEm('Em análise'), 150)
+
+    // Quando / Então
+    expect(() => updateBudget(servico, -50)).toThrow('O orçamento precisa ser maior que zero')
+    expect(() => updateBudget(servico, 0)).toThrow('O orçamento precisa ser maior que zero')
+
+    // E
+    expect(servico.budget).toBe(150)
+  })
+})
+
+// Cenário 2 (semana 8)
+// Cenário: serviço sem orçamento não vai para Em manutenção
+//   Dado um serviço Em análise com diagnóstico "Fonte queimada" e sem orçamento
+//   Quando tento colocar o serviço Em manutenção
+//   Então aparece o erro "Registre o orçamento antes de colocar o serviço Em manutenção"
+describe('orçamento antes de Em manutenção', () => {
+  test('serviço sem orçamento não vai para Em manutenção', () => {
+    // Dado
+    const servico = { ...servicoComDiagnostico('Em análise', 'Fonte queimada'), budget: null }
+
+    // Quando / Então
+    expect(() => changeStatus(servico, 'Em manutenção')).toThrow(
+      'Registre o orçamento antes de colocar o serviço Em manutenção',
+    )
+  })
+})
+
+// Cenário 3 (semana 8)
+// Cenário: resumo do quadro conta quantos serviços há em cada status
+//   Dado 2 serviços Recebido, 1 Em manutenção e 1 Concluído
+//   Quando peço o resumo do quadro
+//   Então vejo Recebido 2, Em análise 0, Em manutenção 1 e Concluído 1
+describe('resumo do quadro', () => {
+  test('resumo do quadro conta quantos serviços há em cada status', () => {
+    // Dado
+    const servicos = [
+      servicoEm('Recebido'),
+      servicoEm('Recebido'),
+      servicoEm('Em manutenção'),
+      servicoEm('Concluído'),
+    ]
+
+    // Quando
+    const resumo = countByStatus(servicos)
+
+    // Então
+    expect(resumo).toEqual({ Recebido: 2, 'Em análise': 0, 'Em manutenção': 1, Concluído: 1 })
   })
 })
