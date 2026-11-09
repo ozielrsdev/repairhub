@@ -1,0 +1,16 @@
+# Uma linha por achado (de qualquer origem). Preenchido DEPOIS dos dois registros já estarem commitados.
+# quem_achou: humano | revisor-sinais-ia | revisor-seguranca-ia | multiplos
+# categoria: lint | teste | leitura | dominio | seguranca | escopo | outro
+# prioridade_final: bloqueia | nao-bloqueia | nice-to-have
+#
+# Ordem provada (git log --format='%h %ad %s' --date=format:'%H:%M:%S' main..revisao/semana9):
+#   3130ee7 16:38:03 docs: saída dos subagentes revisor-sinais-ia e revisor-seguranca-ia no PR #6
+#   b98b075 16:37:08 docs: revisão humana do PR #6 (semana 9), antes dos subagentes
+# O revisor-seguranca-ia rodou e não teve achados nos 4 riscos (ver REGISTRO-SUBAGENTE.md), por isso não tem linha.
+achado_id,descricao,quem_achou,categoria,prioridade_final,justificativa_se_nao_bloqueia,timestamp
+H1,"botão 'Ver detalhes' fica no rodapé do card aberto e cansa procurar; sugestão: modal ou botão + no canto de cima",humano,escopo,nao-bloqueia,"está no ServiceCard, que o PR #6 não mudou; a busca pode entrar e isso vira um PR próprio de melhoria da tela",2026-11-09T16:37
+H2,"botões explícitos de status ('Enviar para análise', 'Manutenção', 'Concluído') em vez de só arrastar ou usar o seletor",humano,escopo,nao-bloqueia,"melhoria de uso fora do que o PR mudou; não atrapalha a busca",2026-11-09T16:37
+H3,"voltar o status um passo por vez cansa; regra proposta: avançar continua um por vez, voltar pode pular etapas mas só até Em análise (nunca para Recebido)",humano,dominio,nao-bloqueia,"muda uma regra de negócio que já existe em changeStatus; precisa de teste antes e de PR próprio, não cabe no PR da busca",2026-11-09T16:37
+H4,"modal antes de concluir para registrar serviço realizado e valores de uma vez",humano,escopo,nao-bloqueia,"ideia de melhoria do fluxo de conclusão; o fluxo atual funciona e o PR não mexe nele",2026-11-09T16:37
+S1,"regra de busca vazia (trim) repetida na tela (App.tsx) e em filterByClient; se a busca mudar (ex.: ignorar acentos) a tela pode discordar da regra",revisor-sinais-ia,leitura,bloqueia,,2026-11-09T16:38
+S2,"com busca ativa, o contador de cada coluna conta só os serviços do cliente buscado, não o total da loja",revisor-sinais-ia,dominio,nao-bloqueia,"é o comportamento que eu quero: buscando um cliente, quero ver os números dele; o subagente perguntou se era intencional, e é",2026-11-09T16:38
