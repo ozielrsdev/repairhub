@@ -145,3 +145,15 @@ export function countByStatus(services: Service[]): Record<ServiceStatus, number
 
   return counts
 }
+
+// Serviços cujo cliente contém o texto buscado, sem diferença entre maiúsculas e minúsculas.
+// Busca vazia (ou só espaços) devolve todos.
+export function filterByClient(services: Service[], query: string): Service[] {
+  const text = query.trim().toLocaleLowerCase('pt-BR')
+
+  if (!text) {
+    return services
+  }
+
+  return services.filter((service) => service.client.toLocaleLowerCase('pt-BR').includes(text))
+}
