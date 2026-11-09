@@ -296,3 +296,20 @@ describe('orçamento', () => {
     expect(servico.budget).toBe(150)
   })
 })
+
+// Cenário 2 (semana 8)
+// Cenário: serviço sem orçamento não vai para Em manutenção
+//   Dado um serviço Em análise com diagnóstico "Fonte queimada" e sem orçamento
+//   Quando tento colocar o serviço Em manutenção
+//   Então aparece o erro "Registre o orçamento antes de colocar o serviço Em manutenção"
+describe('orçamento antes de Em manutenção', () => {
+  test('serviço sem orçamento não vai para Em manutenção', () => {
+    // Dado
+    const servico = { ...servicoComDiagnostico('Em análise', 'Fonte queimada'), budget: null }
+
+    // Quando / Então
+    expect(() => changeStatus(servico, 'Em manutenção')).toThrow(
+      'Registre o orçamento antes de colocar o serviço Em manutenção',
+    )
+  })
+})
