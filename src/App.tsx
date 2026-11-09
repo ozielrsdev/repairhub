@@ -2,9 +2,11 @@ import { useState } from 'react'
 import ServiceForm from './components/ServiceForm'
 import Footer from './components/Footer'
 import ServiceBoard from './components/ServiceBoard'
+import { Input } from '@/components/ui/input'
 import {
   changeStatus,
   createService,
+  filterByClient,
   updateBudget,
   updateDiagnosis,
   updateServiceDone,
@@ -16,6 +18,9 @@ import type { Service, ServiceStatus, Urgency } from './types'
 // Os handlers devolvem a mensagem de erro da regra violada, ou null se deu certo.
 function App() {
   const [services, setServices] = useState<Service[]>([])
+  const [clientQuery, setClientQuery] = useState('')
+
+  const visibleServices = filterByClient(services, clientQuery)
 
   function handleAddService(input: NewServiceInput): string | null {
     try {
@@ -73,9 +78,26 @@ function App() {
         <ServiceForm onAddService={handleAddService} />
 
         <section className="grid gap-4">
-          <h2 className="text-xl font-semibold tracking-tight">Quadro de serviços</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold tracking-tight">Quadro de serviços</h2>
+            <Input
+              type="search"
+              aria-label="Buscar por cliente"
+              placeholder="Buscar por cliente"
+              value={clientQuery}
+              onChange={(event) => setClientQuery(event.target.value)}
+              className="w-full sm:w-64"
+            />
+          </div>
+          {/* Busca vazia devolve todos (regra do filterByClient), então lista vazia aqui
+              só acontece quando a busca não achou ninguém. */}
+          {services.length > 0 && visibleServices.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nenhum serviço encontrado para "{clientQuery}".
+            </p>
+          )}
           <ServiceBoard
-            services={services}
+            services={visibleServices}
             onStatusChange={handleStatusChange}
             onDiagnosisChange={handleDiagnosisChange}
             onServiceDoneChange={handleServiceDoneChange}
