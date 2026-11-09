@@ -27,7 +27,7 @@ describe('a) cadastro', () => {
 
     expect(servico.client).toBe('Padaria Pão Quente')
     expect(servico.equipment).toBe('Computador do caixa')
-    expect(servico.status).toBe('Recebido')
+    expect(servico.status).toBe('Em análise') // QUEBRA DE PROPÓSITO: prova que o CI bloqueia o merge
     expect(servico.id).toBeTruthy()
   })
 
