@@ -4,6 +4,7 @@ import {
   changeStatus,
   countByStatus,
   createService,
+  filterByClient,
   sortByUrgency,
   updateBudget,
   updateDiagnosis,
@@ -347,5 +348,26 @@ describe('resumo do quadro', () => {
 
     // Então
     expect(resumo).toEqual({ Recebido: 2, 'Em análise': 0, 'Em manutenção': 1, Concluído: 1 })
+  })
+})
+
+// Cenário: buscar serviços pelo nome do cliente
+//   Dado serviços da "Padaria Pão Quente", da "Farmácia Bem Estar" e da "Padaria Central"
+//   Quando busco "padaria"
+//   Então aparecem só os serviços das duas padarias, sem diferença entre maiúsculas e minúsculas
+describe('buscar por cliente', () => {
+  const servicos = ['Padaria Pão Quente', 'Farmácia Bem Estar', 'Padaria Central'].map((client) =>
+    createService({ ...novoServico, client }),
+  )
+
+  test('busca pelo nome do cliente sem diferença entre maiúsculas e minúsculas', () => {
+    expect(filterByClient(servicos, 'padaria').map((s) => s.client)).toEqual([
+      'Padaria Pão Quente',
+      'Padaria Central',
+    ])
+  })
+
+  test('busca vazia mostra todos os serviços', () => {
+    expect(filterByClient(servicos, '   ')).toHaveLength(3)
   })
 })
