@@ -18,7 +18,8 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 - Nível de urgência (Baixa, Média, Alta, Crítica) com ícone no card; os mais urgentes
   ficam no topo de cada coluna.
 - Card resumido (cliente, urgência, equipamento e problema); em **Ver detalhes** dá pra
-  registrar o diagnóstico e o serviço realizado e trocar a urgência, a qualquer momento.
+  registrar o diagnóstico, o orçamento e o serviço realizado e trocar a urgência, a qualquer momento.
+- Cada coluna do quadro mostra quantos serviços estão naquele status.
 - Mensagens de erro na tela quando uma regra é quebrada.
 
 > Os dados ficam só na memória do navegador: somem ao recarregar a página. Salvar de
@@ -31,6 +32,8 @@ Pequenos comércios que dependem de computadores para trabalhar precisam realiza
 | Cliente, equipamento e descrição do problema são obrigatórios no cadastro | cadastrar sem equipamento → erro "Equipamento é obrigatório" |
 | O status anda um passo por vez, pra frente ou pra trás | Recebido → Em análise funciona; Recebido → Concluído dá erro |
 | Só vai para Em manutenção com o diagnóstico preenchido | Em análise → Em manutenção com o diagnóstico vazio dá erro |
+| Só vai para Em manutenção com o orçamento registrado | Em análise → Em manutenção sem orçamento dá erro |
+| O orçamento precisa ser maior que zero | orçamento de R$ -50 ou R$ 0 dá erro e o valor anterior fica |
 | Serviço Em manutenção ou Concluído não pode ficar sem diagnóstico | apagar o diagnóstico de um serviço Em manutenção dá erro |
 | Só conclui com o serviço realizado preenchido | Em manutenção → Concluído com o campo vazio dá erro |
 | Salvar o serviço realizado de um serviço Em manutenção já o conclui | o botão vira "Salvar e concluir" |
@@ -51,7 +54,13 @@ npm run dev        # abre o sistema em http://localhost:5173
 npm test           # roda os testes (Vitest)
 npm run build      # confere os tipos e gera a versão final em dist/
 npm run lint       # confere o padrão do código (ESLint)
+npm run typecheck  # confere os tipos (TypeScript)
+npm run verify     # roda lint, typecheck, build e testes em sequência
 ```
+
+O GitHub roda essas mesmas checagens (mais o `npm audit` e a revisão de dependências) em
+todo PR, e a `main` só aceita merge com todas verdes. Ver `.github/workflows/ci.yml` e
+`docs/semana8/ENTREGAVEL.md`.
 
 ## Estrutura
 
