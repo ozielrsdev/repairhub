@@ -9,6 +9,8 @@ export interface Service {
   problem: string
   diagnosis: string
   serviceDone: string
+  // Valor do orçamento em reais. null enquanto não foi registrado.
+  budget: number | null
   urgency: Urgency
   status: ServiceStatus
 }

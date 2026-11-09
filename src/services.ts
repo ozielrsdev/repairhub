@@ -24,7 +24,7 @@ export function createService(input: NewServiceInput): Service {
     throw new Error(result.error.issues[0].message)
   }
 
-  return { id: crypto.randomUUID(), ...result.data, status: 'Recebido' }
+  return { id: crypto.randomUUID(), ...result.data, budget: null, status: 'Recebido' }
 }
 
 // O status anda um passo por vez na ordem de SERVICE_STATUSES, pra frente ou pra trás.
@@ -91,6 +91,16 @@ export function updateUrgency(service: Service, urgency: Urgency): Service {
   }
 
   return { ...service, urgency }
+}
+
+// O orçamento pode ser registrado ou trocado em qualquer status, mas sempre com valor
+// maior que zero.
+export function updateBudget(service: Service, budget: number): Service {
+  if (!(budget > 0)) {
+    throw new Error('O orçamento precisa ser maior que zero')
+  }
+
+  return { ...service, budget }
 }
 
 // Mais urgentes primeiro. O sort é estável, então com a mesma urgência fica a ordem de
