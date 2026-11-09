@@ -131,3 +131,14 @@ export function allowedStatuses(service: Service): ServiceStatus[] {
     }
   })
 }
+
+// Quantos serviços há em cada status, com zero nos status vazios.
+export function countByStatus(services: Service[]): Record<ServiceStatus, number> {
+  const counts = { Recebido: 0, 'Em análise': 0, 'Em manutenção': 0, Concluído: 0 }
+
+  for (const service of services) {
+    counts[service.status] += 1
+  }
+
+  return counts
+}
