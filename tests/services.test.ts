@@ -4,6 +4,7 @@ import {
   changeStatus,
   createService,
   sortByUrgency,
+  updateBudget,
   updateDiagnosis,
   updateServiceDone,
   updateUrgency,
@@ -273,5 +274,25 @@ describe('nível de urgência', () => {
     ]
     sortByUrgency(servicos)
     expect(servicos.map((s) => s.client)).toEqual(['A', 'B'])
+  })
+})
+
+// Cenário 1 (semana 8)
+// Cenário: orçamento zero ou negativo não substitui o orçamento já registrado
+//   Dado um serviço Em análise com orçamento de R$ 150
+//   Quando tento mudar o orçamento para R$ -50 ou para R$ 0
+//   Então aparece o erro "O orçamento precisa ser maior que zero"
+//   E o serviço continua com orçamento de R$ 150
+describe('orçamento', () => {
+  test('orçamento zero ou negativo não substitui o orçamento já registrado', () => {
+    // Dado
+    const servico = updateBudget(servicoEm('Em análise'), 150)
+
+    // Quando / Então
+    expect(() => updateBudget(servico, -50)).toThrow('O orçamento precisa ser maior que zero')
+    expect(() => updateBudget(servico, 0)).toThrow('O orçamento precisa ser maior que zero')
+
+    // E
+    expect(servico.budget).toBe(150)
   })
 })
