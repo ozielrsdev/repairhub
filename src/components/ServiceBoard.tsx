@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { DragEvent } from 'react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import { allowedStatuses, sortByUrgency } from '../services'
+import { allowedStatuses, countByStatus, sortByUrgency } from '../services'
 import { SERVICE_STATUSES } from '../types'
 import type { Service, ServiceStatus, Urgency } from '../types'
 import { StatusBadge } from './ServiceBadges'
@@ -43,6 +43,7 @@ function ServiceBoard({
 
   const draggingService = services.find((service) => service.id === draggingId)
   const dropTargets = draggingService ? allowedStatuses(draggingService) : []
+  const counts = countByStatus(services)
 
   function handleStatusChange(id: string, status: ServiceStatus) {
     const result = onStatusChange(id, status)
@@ -134,7 +135,7 @@ function ServiceBoard({
             <header className="flex items-center justify-between">
               <StatusBadge status={status} />
               <Badge variant="secondary" className="tabular-nums" aria-label="Quantidade de serviços">
-                {columnServices.length}
+                {counts[status]}
               </Badge>
             </header>
 
