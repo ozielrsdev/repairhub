@@ -1,0 +1,101 @@
+# Verificadores do RepairHub (semana 8): lint, type check, build, testes e checagem de
+# dependências. A branch protection da main exige estes jobs verdes antes do merge.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Permissão mínima. O agente (e você) só ganham mais que isso se um job pedir
+# explicitamente — ver GUIA-DO-ALUNO.md, seção de troubleshooting, "erro de
+# permissão".
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    # Só builda se passou lint e type check — não gasta minuto de runner
+    # buildando código que já sabemos que tem problema.
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm test
+
+  dependency-audit:
+    name: "Dependency check: vulnerabilidade conhecida (npm audit)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      # --audit-level=high: falha o job se existir vulnerabilidade "high" ou
+      # "critical" numa dependência instalada. moderate/low ficam no relatório
+      # mas não bloqueiam — ajuste se sua régua for mais rígida.
+      - run: npm audit --audit-level=high
+
+  # Só roda em Pull Request (compara o que o PR está ADICIONANDO de dependência
+  # contra o que já existe na base). Exige "Dependency graph" habilitado no
+  # repositório (Settings → Security → veja branch-protection-guia.md) e, em
+  # repositório PRIVADO, exige GitHub Advanced Security — não roda de graça
+  # em repo privado. Ver branch-protection-guia.md, seção 4.
+  dependency-review:
+    name: "Dependency check: revisão do PR (dependency-review-action)"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
