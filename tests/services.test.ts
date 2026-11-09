@@ -30,7 +30,13 @@ describe('a) cadastro', () => {
     expect(servico.client).toBe('Padaria Pão Quente')
     expect(servico.equipment).toBe('Computador do caixa')
     expect(servico.status).toBe('Recebido')
-    expect(servico.id).toBeTruthy()
+  })
+
+  test('cada serviço cadastrado ganha um id diferente', () => {
+    const primeiro = createService(novoServico)
+    const segundo = createService(novoServico)
+
+    expect(primeiro.id).not.toBe(segundo.id)
   })
 
   test('dá erro quando falta o cliente', () => {
