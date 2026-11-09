@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import {
   allowedStatuses,
   changeStatus,
+  countByStatus,
   createService,
   sortByUrgency,
   updateBudget,
@@ -317,5 +318,28 @@ describe('orçamento antes de Em manutenção', () => {
     expect(() => changeStatus(servico, 'Em manutenção')).toThrow(
       'Registre o orçamento antes de colocar o serviço Em manutenção',
     )
+  })
+})
+
+// Cenário 3 (semana 8)
+// Cenário: resumo do quadro conta quantos serviços há em cada status
+//   Dado 2 serviços Recebido, 1 Em manutenção e 1 Concluído
+//   Quando peço o resumo do quadro
+//   Então vejo Recebido 2, Em análise 0, Em manutenção 1 e Concluído 1
+describe('resumo do quadro', () => {
+  test('resumo do quadro conta quantos serviços há em cada status', () => {
+    // Dado
+    const servicos = [
+      servicoEm('Recebido'),
+      servicoEm('Recebido'),
+      servicoEm('Em manutenção'),
+      servicoEm('Concluído'),
+    ]
+
+    // Quando
+    const resumo = countByStatus(servicos)
+
+    // Então
+    expect(resumo).toEqual({ Recebido: 2, 'Em análise': 0, 'Em manutenção': 1, Concluído: 1 })
   })
 })
