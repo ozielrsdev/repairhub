@@ -14,6 +14,7 @@ interface ServiceBoardProps {
   onDiagnosisChange: (id: string, diagnosis: string) => string | null
   onServiceDoneChange: (id: string, serviceDone: string) => string | null
   onUrgencyChange: (id: string, urgency: Urgency) => string | null
+  onBudgetChange: (id: string, budget: number) => string | null
 }
 
 function withoutKey<T>(record: Record<string, T>, key: string): Record<string, T> {
@@ -30,11 +31,13 @@ function ServiceBoard({
   onDiagnosisChange,
   onServiceDoneChange,
   onUrgencyChange,
+  onBudgetChange,
 }: ServiceBoardProps) {
   const [errors, setErrors] = useState<Record<string, string | null>>({})
   // Texto que o técnico está digitando e ainda não salvou, por serviço.
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [diagnosisDrafts, setDiagnosisDrafts] = useState<Record<string, string>>({})
+  const [budgetDrafts, setBudgetDrafts] = useState<Record<string, string>>({})
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [draggingId, setDraggingId] = useState<string | null>(null)
 
@@ -66,6 +69,17 @@ function ServiceBoard({
 
     if (!result) {
       setDrafts((current) => withoutKey(current, id))
+    }
+  }
+
+  // Campo vazio vira NaN, e a regra do updateBudget recusa com a mensagem de valor inválido.
+  function handleSaveBudget(id: string, budget: string) {
+    const value = budget.trim() === '' ? Number.NaN : Number(budget.replace(',', '.'))
+    const result = onBudgetChange(id, value)
+    setErrors((current) => ({ ...current, [id]: result }))
+
+    if (!result) {
+      setBudgetDrafts((current) => withoutKey(current, id))
     }
   }
 
@@ -139,6 +153,7 @@ function ServiceBoard({
                     dragging={service.id === draggingId}
                     diagnosisDraft={diagnosisDrafts[service.id] ?? service.diagnosis}
                     serviceDoneDraft={drafts[service.id] ?? service.serviceDone}
+                    budgetDraft={budgetDrafts[service.id] ?? (service.budget === null ? '' : String(service.budget))}
                     onToggleExpanded={() =>
                       setExpanded((current) => ({ ...current, [service.id]: !current[service.id] }))
                     }
@@ -148,6 +163,10 @@ function ServiceBoard({
                     onServiceDoneDraftChange={(text) =>
                       setDrafts((current) => ({ ...current, [service.id]: text }))
                     }
+                    onBudgetDraftChange={(text) =>
+                      setBudgetDrafts((current) => ({ ...current, [service.id]: text }))
+                    }
+                    onSaveBudget={(text) => handleSaveBudget(service.id, text)}
                     onSaveDiagnosis={(text) => handleSaveDiagnosis(service.id, text)}
                     onSaveServiceDone={(text) => handleSaveServiceDone(service.id, text)}
                     onStatusChange={(newStatus) => handleStatusChange(service.id, newStatus)}

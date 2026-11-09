@@ -3,6 +3,7 @@ import { ChevronDownIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -17,15 +18,24 @@ interface ServiceCardProps {
   dragging: boolean
   diagnosisDraft: string
   serviceDoneDraft: string
+  budgetDraft: string
   onToggleExpanded: () => void
   onDiagnosisDraftChange: (text: string) => void
   onServiceDoneDraftChange: (text: string) => void
+  onBudgetDraftChange: (text: string) => void
+  onSaveBudget: (text: string) => void
   onSaveDiagnosis: (text: string) => void
   onSaveServiceDone: (text: string) => void
   onStatusChange: (status: ServiceStatus) => void
   onUrgencyChange: (urgency: Urgency) => void
   onDragStart: () => void
   onDragEnd: () => void
+}
+
+const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+
+function formatBudget(value: number) {
+  return currency.format(value)
 }
 
 function StatusSelect({
@@ -68,9 +78,12 @@ function ServiceCard({
   dragging,
   diagnosisDraft,
   serviceDoneDraft,
+  budgetDraft,
   onToggleExpanded,
   onDiagnosisDraftChange,
   onServiceDoneDraftChange,
+  onBudgetDraftChange,
+  onSaveBudget,
   onSaveDiagnosis,
   onSaveServiceDone,
   onStatusChange,
@@ -86,6 +99,7 @@ function ServiceCard({
 
   const diagnosisId = `diagnosis-${service.id}`
   const serviceDoneId = `service-done-${service.id}`
+  const budgetId = `budget-${service.id}`
   const urgencyId = `urgency-${service.id}`
   const statusId = `status-${service.id}`
 
@@ -118,6 +132,12 @@ function ServiceCard({
               <dt className="inline text-muted-foreground">Problema: </dt>
               <dd className="inline">{service.problem}</dd>
             </div>
+            {service.budget !== null && (
+              <div>
+                <dt className="inline text-muted-foreground">Orçamento: </dt>
+                <dd className="inline">{formatBudget(service.budget)}</dd>
+              </div>
+            )}
           </dl>
 
           {expanded && (
@@ -138,6 +158,29 @@ function ServiceCard({
                   onClick={() => onSaveDiagnosis(diagnosisDraft)}
                 >
                   Salvar diagnóstico
+                </Button>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor={budgetId}>Orçamento (R$)</Label>
+                <Input
+                  id={budgetId}
+                  type="number"
+                  inputMode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  value={budgetDraft}
+                  onChange={(event) => onBudgetDraftChange(event.target.value)}
+                  placeholder="Ex: 150"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="justify-self-start"
+                  disabled={budgetDraft === (service.budget === null ? '' : String(service.budget))}
+                  onClick={() => onSaveBudget(budgetDraft)}
+                >
+                  Salvar orçamento
                 </Button>
               </div>
 

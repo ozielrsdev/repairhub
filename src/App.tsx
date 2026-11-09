@@ -5,6 +5,7 @@ import ServiceBoard from './components/ServiceBoard'
 import {
   changeStatus,
   createService,
+  updateBudget,
   updateDiagnosis,
   updateServiceDone,
   updateUrgency,
@@ -53,6 +54,10 @@ function App() {
     return updateService(id, (service) => updateServiceDone(service, serviceDone))
   }
 
+  function handleBudgetChange(id: string, budget: number): string | null {
+    return updateService(id, (service) => updateBudget(service, budget))
+  }
+
   function handleUrgencyChange(id: string, urgency: Urgency): string | null {
     return updateService(id, (service) => updateUrgency(service, urgency))
   }
@@ -75,6 +80,7 @@ function App() {
             onDiagnosisChange={handleDiagnosisChange}
             onServiceDoneChange={handleServiceDoneChange}
             onUrgencyChange={handleUrgencyChange}
+            onBudgetChange={handleBudgetChange}
           />
         </section>
       </main>
