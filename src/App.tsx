@@ -89,9 +89,11 @@ function App() {
               className="w-full sm:w-64"
             />
           </div>
-          {clientQuery.trim() && visibleServices.length === 0 && (
+          {/* Busca vazia devolve todos (regra do filterByClient), então lista vazia aqui
+              só acontece quando a busca não achou ninguém. */}
+          {services.length > 0 && visibleServices.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Nenhum serviço encontrado para "{clientQuery.trim()}".
+              Nenhum serviço encontrado para "{clientQuery}".
             </p>
           )}
           <ServiceBoard
