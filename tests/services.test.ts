@@ -147,8 +147,8 @@ describe('d) diagnóstico antes de Em manutenção', () => {
     )
   })
 
-  test('com diagnóstico, avança para Em manutenção', () => {
-    const servico = servicoComDiagnostico('Em análise', 'Fonte queimada, precisa trocar')
+  test('com diagnóstico e orçamento, avança para Em manutenção', () => {
+    const servico = { ...servicoComDiagnostico('Em análise', 'Fonte queimada, precisa trocar'), budget: 150 }
     expect(changeStatus(servico, 'Em manutenção').status).toBe('Em manutenção')
   })
 })
@@ -176,10 +176,11 @@ describe('registrar o diagnóstico', () => {
     expect(() => updateDiagnosis(servico, '')).toThrow('precisa ter o diagnóstico preenchido')
   })
 
-  test('fluxo completo: cadastrar → Em análise → diagnóstico → Em manutenção → serviço realizado → Concluído', () => {
+  test('fluxo completo: cadastrar → Em análise → diagnóstico → orçamento → Em manutenção → serviço realizado → Concluído', () => {
     let servico = createService(novoServico)
     servico = changeStatus(servico, 'Em análise')
     servico = updateDiagnosis(servico, 'Memória RAM insuficiente')
+    servico = updateBudget(servico, 250)
     servico = changeStatus(servico, 'Em manutenção')
     servico = updateServiceDone(servico, 'Instalação de mais 8 GB de RAM')
 
@@ -198,8 +199,9 @@ describe('para quais status o serviço pode ir (colunas do quadro)', () => {
     expect(allowedStatuses(servicoComDiagnostico('Em análise', ''))).toEqual(['Recebido'])
   })
 
-  test('Em análise com diagnóstico pode voltar ou ir para Em manutenção', () => {
-    expect(allowedStatuses(servicoComDiagnostico('Em análise', 'Fonte queimada'))).toEqual([
+  test('Em análise com diagnóstico e orçamento pode voltar ou ir para Em manutenção', () => {
+    const servico = { ...servicoComDiagnostico('Em análise', 'Fonte queimada'), budget: 150 }
+    expect(allowedStatuses(servico)).toEqual([
       'Recebido',
       'Em manutenção',
     ])
@@ -212,7 +214,11 @@ describe('para quais status o serviço pode ir (colunas do quadro)', () => {
   })
 
   test('Concluído só pode voltar para Em manutenção', () => {
-    const servico = { ...servicoComDiagnostico('Concluído', 'Fonte queimada'), serviceDone: 'Troca da fonte' }
+    const servico = {
+      ...servicoComDiagnostico('Concluído', 'Fonte queimada'),
+      serviceDone: 'Troca da fonte',
+      budget: 150,
+    }
     expect(allowedStatuses(servico)).toEqual(['Em manutenção'])
   })
 })

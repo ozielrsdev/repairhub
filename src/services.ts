@@ -46,6 +46,10 @@ export function changeStatus(service: Service, newStatus: ServiceStatus): Servic
     throw new Error('Preencha o diagnóstico antes de colocar o serviço Em manutenção')
   }
 
+  if (newStatus === 'Em manutenção' && service.budget === null) {
+    throw new Error('Registre o orçamento antes de colocar o serviço Em manutenção')
+  }
+
   if (newStatus === 'Concluído' && !service.serviceDone.trim()) {
     throw new Error('Preencha o serviço realizado antes de marcar como Concluído')
   }
