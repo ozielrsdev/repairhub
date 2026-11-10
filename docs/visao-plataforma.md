@@ -10,7 +10,7 @@ Quero transformá-lo numa plataforma que eu vou VENDER para assistências técni
 
 1. **Conta da assistência (empresa)**
    - Cadastro da assistência: nome fantasia, razão social, CNPJ (validado), endereço,
-     telefone, e-mail, logo, inscrição municipal, regime tributário.
+     telefone, e-mail, logo.
    - Login com e-mail e senha; recuperação de senha.
    - Cada assistência só enxerga os próprios clientes, serviços e documentos.
 
@@ -42,12 +42,17 @@ Quero transformá-lo numa plataforma que eu vou VENDER para assistências técni
    - Gerar um PDF claro e completo: dados da assistência, dados do cliente, equipamento,
      problema relatado, diagnóstico, o que foi feito, peças, valores, forma de pagamento,
      garantia, técnico responsável e datas.
-   - Emitir a nota fiscal oficial (NFS-e para serviço, NF-e para peças) por um provedor de
-     API de notas fiscais, usando os dados fiscais da assistência.
+   - O PDF é um comprovante do serviço, não um documento fiscal. No rodapé, ele avisa:
+     "Este documento não tem valor fiscal."
 
 7. **Transparência para o cliente**
    - Tudo o que o cliente paga tem que estar explicado no documento: cada item, cada valor
      e o que foi feito, em linguagem que o cliente entende.
+
+## Fora do escopo por agora
+
+- Nota fiscal oficial (NFS-e para serviço, NF-e para peças), por um provedor de API.
+  Não precisa planejar agora, mas a arquitetura não pode impedir de acrescentá-la depois.
 
 ## Como eu quero que você trabalhe
 
@@ -57,14 +62,13 @@ Quero transformá-lo numa plataforma que eu vou VENDER para assistências técni
      Cliente, Equipamento, Serviço, Orçamento, Item, Pagamento, Documento) e um glossário
      (skill `domain-modeling`).
   3. Uma proposta de arquitetura: back-end, banco, autenticação, separação entre
-     assistências, geração de PDF e emissão de nota. Para cada escolha, as opções, os prós
+     assistências e geração de PDF. Para cada escolha, as opções, os prós
      e contras e o custo, e qual você recomenda.
   4. Um plano em fases pequenas, cada uma entregando algo usável, por exemplo:
      - Fase 1: persistência e cadastro de clientes;
      - Fase 2: login, assistência e funcionários;
      - Fase 3: orçamento com itens e PDF;
-     - Fase 4: fechamento, pagamento e PDF final;
-     - Fase 5: nota fiscal oficial.
+     - Fase 4: fechamento, pagamento e PDF final.
   5. O que muda no CLAUDE.md e no README com essa nova visão.
 - Siga as regras do CLAUDE.md:
   - Não instale nenhuma dependência sem me perguntar.
@@ -76,6 +80,5 @@ Quero transformá-lo numa plataforma que eu vou VENDER para assistências técni
   as opções antes.
 - Me aponte o que tem impacto legal ou de segurança:
   - LGPD: CPF e endereço de clientes;
-  - guarda de senhas e do certificado digital;
-  - os dados de uma assistência nunca podem aparecer para outra;
-  - as exigências fiscais da nota.
+  - guarda de senhas;
+  - os dados de uma assistência nunca podem aparecer para outra.
