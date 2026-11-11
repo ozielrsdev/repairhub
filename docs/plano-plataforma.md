@@ -42,6 +42,12 @@ código. O nome no código (`Service`) também muda para Ordem de Serviço aos p
 
 **Nota fiscal:** continua fora do escopo.
 
+**Exceção da Fase 1:** as mudanças de status ainda não são garantidas no banco, só no
+`src/services.ts`. Entram no banco na Fase 4, quando o fluxo de status muda, para não
+escrever as mesmas regras duas vezes. O risco enquanto isso é baixo: com o Row Level
+Security e só o dono entrando, quem pular uma etapa só mexe nos próprios dados. A separação
+por assistência e as checagens de status, urgência e orçamento já estão no banco.
+
 ---
 
 ## 1. Perguntas antes de começar
