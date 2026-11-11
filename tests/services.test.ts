@@ -10,6 +10,7 @@ import {
   updateDiagnosis,
   updateServiceDone,
   updateUrgency,
+  validateAgencySignUp,
 } from '../src/services'
 import type { Service } from '../src/types'
 
@@ -369,5 +370,69 @@ describe('buscar por cliente', () => {
 
   test('busca vazia mostra todos os serviços', () => {
     expect(filterByClient(servicos, '   ')).toHaveLength(3)
+  })
+})
+
+// Dado o dono de uma assistência criando a conta
+//   Quando ele informa o nome fantasia, a razão social e o CNPJ
+//   Então a conta só é criada com CNPJ válido, guardado sem pontuação
+describe('criar a conta da assistência', () => {
+  const novaAssistencia = {
+    tradeName: 'TecFix Informática',
+    legalName: 'TecFix Assistência Técnica Ltda',
+    cnpj: '11.222.333/0001-81',
+    phone: '(11) 98888-7777',
+  }
+
+  test('aceita CNPJ válido com pontuação e guarda só os números', () => {
+    expect(validateAgencySignUp(novaAssistencia)).toEqual({
+      tradeName: 'TecFix Informática',
+      legalName: 'TecFix Assistência Técnica Ltda',
+      cnpj: '11222333000181',
+      phone: '(11) 98888-7777',
+    })
+  })
+
+  test('dá erro com CNPJ de dígito verificador errado', () => {
+    expect(() => validateAgencySignUp({ ...novaAssistencia, cnpj: '11.222.333/0001-82' })).toThrow(
+      'CNPJ inválido: confira os números digitados',
+    )
+  })
+
+  test('dá erro com CNPJ de tamanho errado', () => {
+    expect(() => validateAgencySignUp({ ...novaAssistencia, cnpj: '11.222.333/0001' })).toThrow(
+      'O CNPJ precisa ter 14 caracteres, sem contar a pontuação',
+    )
+  })
+
+  test('dá erro com CNPJ de dígitos todos iguais, mesmo com a conta fechando', () => {
+    expect(() => validateAgencySignUp({ ...novaAssistencia, cnpj: '00.000.000/0000-00' })).toThrow(
+      'CNPJ inválido: confira os números digitados',
+    )
+  })
+
+  test('dá erro quando falta o nome fantasia', () => {
+    expect(() => validateAgencySignUp({ ...novaAssistencia, tradeName: '   ' })).toThrow(
+      'Nome fantasia é obrigatório',
+    )
+  })
+
+  test('dá erro quando falta a razão social', () => {
+    expect(() => validateAgencySignUp({ ...novaAssistencia, legalName: '' })).toThrow(
+      'Razão social é obrigatória',
+    )
+  })
+
+  // Desde julho de 2026 a Receita dá CNPJ com letras nos 12 primeiros caracteres.
+  test('aceita CNPJ alfanumérico, guardado em maiúsculas', () => {
+    expect(validateAgencySignUp({ ...novaAssistencia, cnpj: '12.abc.345/01de-35' }).cnpj).toBe(
+      '12ABC34501DE35',
+    )
+  })
+
+  test('dá erro com símbolo no CNPJ, mesmo com a conta fechando', () => {
+    expect(() => validateAgencySignUp({ ...novaAssistencia, cnpj: '11222333000@05' })).toThrow(
+      'CNPJ inválido: confira os números digitados',
+    )
   })
 })
