@@ -13,7 +13,7 @@ import type { Urgency } from '../types'
 import { UrgencyLabel } from './ServiceBadges'
 
 interface ServiceFormProps {
-  onAddService: (input: NewServiceInput) => string | null
+  onAddService: (input: NewServiceInput) => Promise<string | null>
 }
 
 function ServiceForm({ onAddService }: ServiceFormProps) {
@@ -23,10 +23,10 @@ function ServiceForm({ onAddService }: ServiceFormProps) {
   const [urgency, setUrgency] = useState<Urgency>('Média')
   const [error, setError] = useState<string | null>(null)
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    const result = onAddService({ client, equipment, problem, urgency })
+    const result = await onAddService({ client, equipment, problem, urgency })
     setError(result)
 
     if (result) {
