@@ -72,8 +72,8 @@ no [Supabase](https://supabase.com) (o plano grátis serve).
 ### Configurar o Supabase (uma vez)
 
 1. Crie um projeto no Supabase.
-2. No **SQL Editor** do projeto, rode o conteúdo de
-   `supabase/migrations/0001_assistencias_e_os.sql`.
+2. No **SQL Editor** do projeto, rode cada arquivo de `supabase/migrations/`, em ordem
+   (`0001_…`, depois `0002_…`).
 3. Em **Authentication → URL Configuration**, coloque o endereço do app em **Site URL**
    (`http://localhost:5173` para rodar na sua máquina) e o endereço da Vercel em
    **Redirect URLs**. É para onde o link de confirmação de e-mail leva.

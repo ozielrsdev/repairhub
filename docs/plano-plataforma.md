@@ -48,6 +48,13 @@ escrever as mesmas regras duas vezes. O risco enquanto isso é baixo: com o Row 
 Security e só o dono entrando, quem pular uma etapa só mexe nos próprios dados. A separação
 por assistência e as checagens de status, urgência e orçamento já estão no banco.
 
+**Antes de vender: reserva de CNPJ.** O cadastro é aberto, e o banco confere só se o CNPJ
+é válido, não se a pessoa é dona da empresa. Alguém pode criar uma conta com o CNPJ de outra
+assistência e impedir a dona verdadeira de se cadastrar (o CNPJ só pode ter uma conta).
+Opções a decidir: aprovação manual das contas novas, conferir o CNPJ e o e-mail numa base
+pública, ou um jeito de a dona verdadeira contestar. Achado da revisão de segurança da
+Fase 1.
+
 ---
 
 ## 1. Perguntas antes de começar
