@@ -10,11 +10,11 @@ import ServiceCard from './ServiceCard'
 
 interface ServiceBoardProps {
   services: Service[]
-  onStatusChange: (id: string, status: ServiceStatus) => string | null
-  onDiagnosisChange: (id: string, diagnosis: string) => string | null
-  onServiceDoneChange: (id: string, serviceDone: string) => string | null
-  onUrgencyChange: (id: string, urgency: Urgency) => string | null
-  onBudgetChange: (id: string, budget: number) => string | null
+  onStatusChange: (id: string, status: ServiceStatus) => Promise<string | null>
+  onDiagnosisChange: (id: string, diagnosis: string) => Promise<string | null>
+  onServiceDoneChange: (id: string, serviceDone: string) => Promise<string | null>
+  onUrgencyChange: (id: string, urgency: Urgency) => Promise<string | null>
+  onBudgetChange: (id: string, budget: number) => Promise<string | null>
 }
 
 function withoutKey<T>(record: Record<string, T>, key: string): Record<string, T> {
@@ -45,8 +45,8 @@ function ServiceBoard({
   const dropTargets = draggingService ? allowedStatuses(draggingService) : []
   const counts = countByStatus(services)
 
-  function handleStatusChange(id: string, status: ServiceStatus) {
-    const result = onStatusChange(id, status)
+  async function handleStatusChange(id: string, status: ServiceStatus) {
+    const result = await onStatusChange(id, status)
     setErrors((current) => ({ ...current, [id]: result }))
 
     // Abre os detalhes pra pessoa ver o campo que falta preencher.
@@ -55,8 +55,8 @@ function ServiceBoard({
     }
   }
 
-  function handleSaveDiagnosis(id: string, diagnosis: string) {
-    const result = onDiagnosisChange(id, diagnosis)
+  async function handleSaveDiagnosis(id: string, diagnosis: string) {
+    const result = await onDiagnosisChange(id, diagnosis)
     setErrors((current) => ({ ...current, [id]: result }))
 
     if (!result) {
@@ -64,8 +64,8 @@ function ServiceBoard({
     }
   }
 
-  function handleSaveServiceDone(id: string, serviceDone: string) {
-    const result = onServiceDoneChange(id, serviceDone)
+  async function handleSaveServiceDone(id: string, serviceDone: string) {
+    const result = await onServiceDoneChange(id, serviceDone)
     setErrors((current) => ({ ...current, [id]: result }))
 
     if (!result) {
@@ -74,9 +74,9 @@ function ServiceBoard({
   }
 
   // Campo vazio vira NaN, e a regra do updateBudget recusa com a mensagem de valor inválido.
-  function handleSaveBudget(id: string, budget: string) {
+  async function handleSaveBudget(id: string, budget: string) {
     const value = budget.trim() === '' ? Number.NaN : Number(budget.replace(',', '.'))
-    const result = onBudgetChange(id, value)
+    const result = await onBudgetChange(id, value)
     setErrors((current) => ({ ...current, [id]: result }))
 
     if (!result) {
@@ -84,8 +84,8 @@ function ServiceBoard({
     }
   }
 
-  function handleUrgencyChange(id: string, urgency: Urgency) {
-    const result = onUrgencyChange(id, urgency)
+  async function handleUrgencyChange(id: string, urgency: Urgency) {
+    const result = await onUrgencyChange(id, urgency)
     setErrors((current) => ({ ...current, [id]: result }))
   }
 
@@ -100,7 +100,7 @@ function ServiceBoard({
   function handleDrop(event: DragEvent<HTMLElement>, status: ServiceStatus) {
     event.preventDefault()
     if (draggingId) {
-      handleStatusChange(draggingId, status)
+      void handleStatusChange(draggingId, status)
     }
     setDraggingId(null)
   }

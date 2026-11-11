@@ -14,14 +14,17 @@ em código novo, telas e mensagens. Nota fiscal oficial está fora do escopo por
 
 - React 19 + TypeScript, Vite. Validação com Zod. Testes com Vitest.
 - Regras de negócio em `src/services.ts`, sem nada de tela. Componentes em `src/components/`.
-- Os dados ficam em memória (`useState` no `App.tsx`): ainda não há persistência.
-- Planejado (ADR 0001): Supabase para banco, login e separação por assistência, a partir da
-  Fase 1. Ainda não está instalado.
+- Supabase (ADR 0001) para banco, login e separação por assistência. As tabelas e o Row
+  Level Security estão em `supabase/migrations/` (rodar no SQL Editor, em ordem). A leitura
+  e a gravação no banco ficam em `src/repository.ts`, e o login em `src/auth.ts`.
+- Variáveis no `.env.local` (ver `.env.example`). O teste de separação
+  (`tests/isolamento.test.ts`) usa um projeto só de teste, com as variáveis
+  `TEST_SUPABASE_*` no `.env.test.local`. Sem elas, ele aparece como "skipped".
 
 ## Comandos
 
 - `npm install` — instala as dependências
-- `npm run dev` — abre o sistema em http://localhost:5173
+- `npm run dev` — abre o sistema em http://localhost:5173 (precisa do `.env.local`)
 - `npm test` — roda os testes
 - `npm run build` — confere os tipos e gera a versão final
 - `npm run lint` — confere o padrão do código

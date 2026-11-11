@@ -1,112 +1,56 @@
-import { useState } from 'react'
-import ServiceForm from './components/ServiceForm'
+import { useEffect, useState } from 'react'
+import type { Session, SupabaseClient } from '@supabase/supabase-js'
+import AuthScreen from './components/AuthScreen'
 import Footer from './components/Footer'
-import ServiceBoard from './components/ServiceBoard'
-import { Input } from '@/components/ui/input'
-import {
-  changeStatus,
-  createService,
-  filterByClient,
-  updateBudget,
-  updateDiagnosis,
-  updateServiceDone,
-  updateUrgency,
-} from './services'
-import type { NewServiceInput } from './services'
-import type { Service, ServiceStatus, Urgency } from './types'
+import Workspace from './components/Workspace'
+import { supabase } from './lib/supabase'
 
-// Os handlers devolvem a mensagem de erro da regra violada, ou null se deu certo.
+// Sem login, a tela de entrar; com login, o quadro da assistência. undefined = ainda
+// conferindo se já tem sessão salva no navegador.
+function SessionGate({ client }: { client: SupabaseClient }) {
+  const [session, setSession] = useState<Session | null | undefined>(undefined)
+
+  useEffect(() => {
+    client.auth.getSession().then(({ data }) => setSession(data.session))
+
+    const { data } = client.auth.onAuthStateChange((_event, newSession) => setSession(newSession))
+    return () => data.subscription.unsubscribe()
+  }, [client])
+
+  if (session === undefined) {
+    return <p className="text-center text-muted-foreground">Carregando…</p>
+  }
+
+  if (session === null) {
+    return (
+      <>
+        <header className="text-center">
+          <h1 className="text-4xl font-semibold tracking-tight">RepairHub</h1>
+          <p className="mt-1 text-muted-foreground">Controle de serviços de manutenção</p>
+        </header>
+        <AuthScreen client={client} />
+      </>
+    )
+  }
+
+  // key: trocar de conta recria o quadro do zero, sem dados da conta anterior.
+  return <Workspace key={session.user.id} client={client} />
+}
+
 function App() {
-  const [services, setServices] = useState<Service[]>([])
-  const [clientQuery, setClientQuery] = useState('')
-
-  const visibleServices = filterByClient(services, clientQuery)
-
-  function handleAddService(input: NewServiceInput): string | null {
-    try {
-      const service = createService(input)
-      setServices((current) => [...current, service])
-      return null
-    } catch (error) {
-      return (error as Error).message
-    }
-  }
-
-  function updateService(id: string, update: (service: Service) => Service): string | null {
-    const service = services.find((item) => item.id === id)
-    if (!service) {
-      return 'Serviço não encontrado'
-    }
-
-    try {
-      const updated = update(service)
-      setServices((current) => current.map((item) => (item.id === id ? updated : item)))
-      return null
-    } catch (error) {
-      return (error as Error).message
-    }
-  }
-
-  function handleStatusChange(id: string, status: ServiceStatus): string | null {
-    return updateService(id, (service) => changeStatus(service, status))
-  }
-
-  function handleDiagnosisChange(id: string, diagnosis: string): string | null {
-    return updateService(id, (service) => updateDiagnosis(service, diagnosis))
-  }
-
-  function handleServiceDoneChange(id: string, serviceDone: string): string | null {
-    return updateService(id, (service) => updateServiceDone(service, serviceDone))
-  }
-
-  function handleBudgetChange(id: string, budget: number): string | null {
-    return updateService(id, (service) => updateBudget(service, budget))
-  }
-
-  function handleUrgencyChange(id: string, urgency: Urgency): string | null {
-    return updateService(id, (service) => updateUrgency(service, urgency))
-  }
-
   return (
     <div className="mx-auto flex min-h-svh max-w-7xl flex-col gap-10 px-4 py-8 sm:px-6">
-      <header className="text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">RepairHub</h1>
-        <p className="mt-1 text-muted-foreground">Controle de serviços de manutenção</p>
-      </header>
-
-      <main className="flex flex-1 flex-col gap-10">
-        <ServiceForm onAddService={handleAddService} />
-
-        <section className="grid gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold tracking-tight">Quadro de serviços</h2>
-            <Input
-              type="search"
-              aria-label="Buscar por cliente"
-              placeholder="Buscar por cliente"
-              value={clientQuery}
-              onChange={(event) => setClientQuery(event.target.value)}
-              className="w-full sm:w-64"
-            />
-          </div>
-          {/* Busca vazia devolve todos (regra do filterByClient), então lista vazia aqui
-              só acontece quando a busca não achou ninguém. */}
-          {services.length > 0 && visibleServices.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              Nenhum serviço encontrado para "{clientQuery}".
-            </p>
-          )}
-          <ServiceBoard
-            services={visibleServices}
-            onStatusChange={handleStatusChange}
-            onDiagnosisChange={handleDiagnosisChange}
-            onServiceDoneChange={handleServiceDoneChange}
-            onUrgencyChange={handleUrgencyChange}
-            onBudgetChange={handleBudgetChange}
-          />
-        </section>
-      </main>
-
+      {supabase ? (
+        <SessionGate client={supabase} />
+      ) : (
+        <p
+          className="form-error mx-auto max-w-xl rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          role="alert"
+        >
+          O RepairHub não está configurado: faltam VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.
+          Veja o .env.example e o README.
+        </p>
+      )}
       <Footer />
     </div>
   )

@@ -157,3 +157,59 @@ export function filterByClient(services: Service[], query: string): Service[] {
 
   return services.filter((service) => service.client.toLocaleLowerCase('pt-BR').includes(text))
 }
+
+const CNPJ_ERROR = 'CNPJ inválido: confira os números digitados'
+
+// Dígito verificador do CNPJ (módulo 11). Cada caractere vale o código ASCII menos 48.
+function cnpjCheckDigit(base: string): number {
+  let weight = 2
+  let sum = 0
+
+  for (let i = base.length - 1; i >= 0; i--) {
+    sum += (base.charCodeAt(i) - 48) * weight
+    weight = weight === 9 ? 2 : weight + 1
+  }
+
+  const rest = sum % 11
+  return rest < 2 ? 0 : 11 - rest
+}
+
+// CNPJ: 12 letras ou números e 2 dígitos verificadores. Dígitos todos iguais
+// (00.000.000/0000-00) fecham a conta, mas não são CNPJ de verdade.
+function isValidCnpj(cnpj: string): boolean {
+  if (!/^[0-9A-Z]{12}[0-9]{2}$/.test(cnpj) || /^(.)\1+$/.test(cnpj)) {
+    return false
+  }
+
+  const first = cnpjCheckDigit(cnpj.slice(0, 12))
+  const second = cnpjCheckDigit(cnpj.slice(0, 12) + first)
+  return cnpj.slice(12) === `${first}${second}`
+}
+
+const agencySignUpSchema = z.object({
+  tradeName: z.string().trim().min(1, { message: 'Nome fantasia é obrigatório' }),
+  legalName: z.string().trim().min(1, { message: 'Razão social é obrigatória' }),
+  cnpj: z
+    .string()
+    .transform((value) => value.replace(/[.\-/\s]/g, '').toUpperCase())
+    .refine((value) => value.length === 14, {
+      message: 'O CNPJ precisa ter 14 caracteres, sem contar a pontuação',
+      abort: true,
+    })
+    .refine(isValidCnpj, { message: CNPJ_ERROR }),
+  phone: z.string().trim().default(''),
+})
+
+export type AgencySignUpInput = z.input<typeof agencySignUpSchema>
+export type AgencySignUp = z.output<typeof agencySignUpSchema>
+
+// Dados de criar a conta da assistência, limpos. O CNPJ fica sem pontuação.
+export function validateAgencySignUp(input: AgencySignUpInput): AgencySignUp {
+  const result = agencySignUpSchema.safeParse(input)
+
+  if (!result.success) {
+    throw new Error(result.error.issues[0].message)
+  }
+
+  return result.data
+}
