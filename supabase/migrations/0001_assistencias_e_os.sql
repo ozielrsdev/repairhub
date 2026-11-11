@@ -8,7 +8,8 @@ create table public.assistencias (
   nome_fantasia text not null check (length(trim(nome_fantasia)) > 0),
   razao_social text not null check (length(trim(razao_social)) > 0),
   -- Sem pontuação, em maiúsculas: 12 letras ou números e 2 dígitos verificadores.
-  -- Os dígitos verificadores são conferidos no validateAgencySignUp (src/services.ts).
+  -- Aqui só o formato; os dígitos verificadores são conferidos no banco pela migração 0002
+  -- e na tela pelo validateAgencySignUp (src/services.ts).
   cnpj text not null unique check (cnpj ~ '^[0-9A-Z]{12}[0-9]{2}$'),
   telefone text not null default '',
   criado_em timestamptz not null default now()
@@ -75,8 +76,8 @@ create policy "dono altera as OS da própria assistência"
   with check (assistencia_id = public.minha_assistencia_id());
 
 -- Cria a assistência junto com a conta, com os dados enviados no cadastro
--- (options.data do signUp). Se o CNPJ for inválido ou já estiver em uso, a conta
--- também não é criada.
+-- (options.data do signUp). Se o insert falhar (CNPJ fora do formato, já em uso ou, com
+-- a 0002, com dígito verificador errado), a conta também não é criada.
 create function public.criar_assistencia_do_dono()
 returns trigger
 language plpgsql

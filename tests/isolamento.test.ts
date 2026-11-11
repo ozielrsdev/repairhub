@@ -13,6 +13,13 @@ const serviceRoleKey = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY
 // Sem as variáveis, os testes aparecem como "skipped" no resumo do npm test.
 const configured = Boolean(url && anonKey && serviceRoleKey)
 
+// Trava: o teste cria e apaga contas com a chave secreta. Nunca no banco das assistências.
+if (configured && url === process.env.VITE_SUPABASE_URL) {
+  throw new Error(
+    'TEST_SUPABASE_URL aponta para o mesmo projeto do app (VITE_SUPABASE_URL). Use um projeto só de teste.',
+  )
+}
+
 const noSession = { auth: { persistSession: false, autoRefreshToken: false } }
 const password = 'senha-de-teste-123'
 
@@ -118,6 +125,30 @@ describe.skipIf(!configured)('separação entre assistências (banco de teste)',
     expect((await loadAgency(donoB)).tradeName).toBe('Assistência B')
     const { data } = await donoB.from('assistencias').select('id')
     expect(data).toHaveLength(1)
+  })
+
+  // O banco confere os dígitos do CNPJ mesmo para quem não passa pela tela.
+  test('o banco recusa conta com CNPJ de dígito verificador errado', async () => {
+    const { data, error } = await admin.auth.admin.createUser({
+      email: `teste-cnpj-${Date.now()}@repairhub.test`,
+      password,
+      email_confirm: true,
+      user_metadata: {
+        nome_fantasia: 'CNPJ falso',
+        razao_social: 'CNPJ falso Ltda',
+        cnpj: '11222333000182',
+        telefone: '',
+      },
+    })
+    if (data.user) userIds.push(data.user.id)
+
+    expect(error).not.toBeNull()
+  })
+
+  test('sem login não dá pra chamar a função que diz a assistência do dono', async () => {
+    const anonimo = createClient(url!, anonKey!, noSession)
+    const { error } = await anonimo.rpc('minha_assistencia_id')
+    expect(error).not.toBeNull()
   })
 
   test('sem login não lê nada', async () => {
